@@ -51,3 +51,15 @@ coverage/
 *.temp
 .cache/
 
+# Archives
+*.7z
+*.zip
+*.rar
+
+# Windows reserved names
+nul
+NUL
+
+# Claude
+.claude/
+
