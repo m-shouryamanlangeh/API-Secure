@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Routes, Route } from "react-router-dom";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -21,25 +21,29 @@ function App() {
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [showOptical, setShowOptical] = useState(true);
   const [showApp, setShowApp] = useState(false);
+  const isInitialCheck = useRef(true);
 
   // Listen for Firebase auth state — persists across page refreshes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is already logged in (session restored)
+      if (user && isInitialCheck.current) {
+        // Session restored on page refresh — skip animation, go straight to app
         setIsAuthenticated(true);
         setShowOptical(false);
         setShowApp(true);
-      } else {
+      } else if (!user) {
         setIsAuthenticated(false);
       }
+      // After the first check, ignore further onAuthStateChanged calls
+      // Fresh logins are handled by handleAuthSuccess instead
+      isInitialCheck.current = false;
       setIsAuthLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
   const handleAuthSuccess = () => {
-    // After auth (including welcome screen), show optical animation
+    // Fresh login — show optical animation
     setIsAuthenticated(true);
     setShowOptical(true);
   };
